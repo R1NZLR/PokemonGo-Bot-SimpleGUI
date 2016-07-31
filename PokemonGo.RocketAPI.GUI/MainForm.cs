@@ -86,9 +86,15 @@ namespace PokemonGo.RocketAPI.GUI
                 CleanUp();
 
                 // Begin Process
+
+                await Task.Delay(500);
                 await DisplayLoginWindow();                
-                DisplayPositionSelector();                
+                DisplayPositionSelector();
+
+                await Task.Delay(500);
                 await GetCurrentPlayerInformation();
+                
+                await Task.Delay(500);
                 await PreflightCheck();
             }
             catch (Exception ex)

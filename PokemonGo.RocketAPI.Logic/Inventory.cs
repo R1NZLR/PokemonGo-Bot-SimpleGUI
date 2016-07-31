@@ -1,5 +1,6 @@
 ﻿#region
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -109,6 +110,12 @@ namespace PokemonGo.RocketAPI.Logic
                 .Where(p => p != null);
         }
 
+        public async Task<IEnumerable<PokedexEntry>> GetPokedexEntries()
+        {
+            var inventory = await _client.GetInventory();
+            return inventory.InventoryDelta.InventoryItems.Select(i => i.InventoryItemData.PokedexEntry);
+        }
+
         public async Task<IEnumerable<Item>> GetItemsToRecycle(ISettings settings)
         {
             var myItems = await GetItems();
@@ -168,21 +175,40 @@ namespace PokemonGo.RocketAPI.Logic
             }
             var pokemons = myPokemons.ToList();
 
+            await Task.Delay(500);
             var myPokemonSettings = await GetPokemonSettings();
             var pokemonSettings = myPokemonSettings.ToList();
 
+            await Task.Delay(500);
             var myPokemonFamilies = await GetPokemonFamilies();
             var pokemonFamilies = myPokemonFamilies.ToArray();
 
+            await Task.Delay(500);
+            var myPokedexEntries = await GetPokedexEntries();
+            var pokedexEntries = myPokedexEntries.ToList();
+
             var pokemonToEvolve = new List<PokemonData>();
+            var pokemonToExclude = new List<PokemonId>();
+
             foreach (var pokemon in pokemons)
             {
                 var settings = pokemonSettings.Single(x => x.PokemonId == pokemon.PokemonId);
                 var familyCandy = pokemonFamilies.Single(x => settings.FamilyId == x.FamilyId);
+                var nextEvolution = settings.EvolutionIds.FirstOrDefault();
+                var evolutionCapturedCount =
+                    pokedexEntries.FirstOrDefault(x => x?.PokedexEntryNumber == (int)nextEvolution)?.TimesCaptured;
 
                 //Don't evolve if we can't evolve it
-                if (settings.EvolutionIds.Count == 0)
+                if (settings.EvolutionIds.Count == 0 || (evolutionCapturedCount > 0 && settings.ParentPokemonId != PokemonId.Missingno) || pokemonToExclude.Contains(settings.PokemonId))
+                {
+                    pokemonToExclude.Add(settings.PokemonId);
                     continue;
+                }
+
+                if (settings.ParentPokemonId != PokemonId.Missingno)
+                {
+                    pokemonToExclude.Add(settings.PokemonId);
+                }
 
                 var pokemonCandyNeededAlready =
                     pokemonToEvolve.Count(
@@ -190,6 +216,8 @@ namespace PokemonGo.RocketAPI.Logic
                     settings.CandyToEvolve;
                 if (familyCandy.Candy - pokemonCandyNeededAlready > settings.CandyToEvolve)
                     pokemonToEvolve.Add(pokemon);
+                else
+                    pokemonToExclude.Remove(PokemonId.Charmeleon);
             }
 
             return pokemonToEvolve;
