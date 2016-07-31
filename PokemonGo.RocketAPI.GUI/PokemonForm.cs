@@ -36,12 +36,12 @@ namespace PokemonGo.RocketAPI.GUI
             var pokemons =
                 inventory.InventoryDelta.InventoryItems
                 .Select(i => i.InventoryItemData?.Pokemon)
-                    .Where(p => p != null && p?.PokemonId > 0)
+                    .Where(p => p != null && p.PokemonId > 0)
                     .OrderByDescending(key => key.Cp);
 
             var families = inventory.InventoryDelta.InventoryItems
                 .Select(i => i.InventoryItemData?.PokemonFamily)
-                .Where(p => p != null && (int)p?.FamilyId > 0)
+                .Where(p => p != null && p.FamilyId > 0)
                 .OrderByDescending(p => (int)p.FamilyId);
 
             var imageList = new ImageList { ImageSize = new Size(50, 50) };
@@ -62,7 +62,7 @@ namespace PokemonGo.RocketAPI.GUI
                 
                 listViewItem.ImageKey = pokemon.PokemonId.ToString();
                 var pokemonIv = Math.Floor(Logic.Logic.CalculatePokemonPerfection(pokemon));
-                listViewItem.Text = string.Format("{0}\nCP {1} IV {2}%", pokemon.PokemonId, pokemon.Cp, pokemonIv);
+                listViewItem.Text = $"{pokemon.PokemonId}\nCP {pokemon.Cp} IV {pokemonIv}%";
                 listViewItem.Tag = pokemon.Id;
                 listViewItem.ToolTipText = "Candy: " + currentCandy;
 

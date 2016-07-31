@@ -83,6 +83,7 @@
             this.label5 = new System.Windows.Forms.Label();
             this.boxStatsExpHour = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
+            this.itemsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.dGrid)).BeginInit();
             this.groupBox2.SuspendLayout();
             this.groupBox5.SuspendLayout();
@@ -405,7 +406,8 @@
             // 
             this.myInventoryToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.useItemsToolStripMenuItem,
-            this.recycleItemsToolStripMenuItem});
+            this.recycleItemsToolStripMenuItem,
+            this.itemsToolStripMenuItem});
             this.myInventoryToolStripMenuItem.Name = "myInventoryToolStripMenuItem";
             this.myInventoryToolStripMenuItem.Size = new System.Drawing.Size(89, 20);
             this.myInventoryToolStripMenuItem.Text = "My Inventory";
@@ -416,7 +418,7 @@
             this.luckyEgg0ToolStripMenuItem,
             this.incence0ToolStripMenuItem});
             this.useItemsToolStripMenuItem.Name = "useItemsToolStripMenuItem";
-            this.useItemsToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
+            this.useItemsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.useItemsToolStripMenuItem.Text = "Use Item(s)";
             // 
             // luckyEgg0ToolStripMenuItem
@@ -436,7 +438,7 @@
             // recycleItemsToolStripMenuItem
             // 
             this.recycleItemsToolStripMenuItem.Name = "recycleItemsToolStripMenuItem";
-            this.recycleItemsToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
+            this.recycleItemsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.recycleItemsToolStripMenuItem.Text = "Recycle Items";
             this.recycleItemsToolStripMenuItem.Click += new System.EventHandler(this.recycleItemsToolStripMenuItem_Click);
             // 
@@ -644,6 +646,13 @@
             this.label8.TabIndex = 13;
             this.label8.Text = "Pokemon/Hour";
             // 
+            // itemsToolStripMenuItem
+            // 
+            this.itemsToolStripMenuItem.Name = "itemsToolStripMenuItem";
+            this.itemsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.itemsToolStripMenuItem.Text = "Items";
+            this.itemsToolStripMenuItem.Click += new System.EventHandler(this.itemsToolStripMenuItem_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -737,6 +746,7 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.ToolStripMenuItem displayConsoleToolStripMenuItem;
         private GMap.NET.WindowsForms.GMapControl MainMap;
+        private System.Windows.Forms.ToolStripMenuItem itemsToolStripMenuItem;
     }
 }
 

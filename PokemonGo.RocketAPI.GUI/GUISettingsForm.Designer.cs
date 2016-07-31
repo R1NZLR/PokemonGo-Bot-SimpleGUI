@@ -44,6 +44,7 @@
             this.label7 = new System.Windows.Forms.Label();
             this.boxMinBerry = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
+            this.autoTransferRecycle = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // label1
@@ -76,7 +77,7 @@
             // checkAutoTransfer
             // 
             this.checkAutoTransfer.AutoSize = true;
-            this.checkAutoTransfer.Location = new System.Drawing.Point(17, 323);
+            this.checkAutoTransfer.Location = new System.Drawing.Point(15, 293);
             this.checkAutoTransfer.Name = "checkAutoTransfer";
             this.checkAutoTransfer.Size = new System.Drawing.Size(225, 30);
             this.checkAutoTransfer.TabIndex = 4;
@@ -182,11 +183,21 @@
             this.label8.TabIndex = 13;
             this.label8.Text = "Use Berry if Pokemon catch \r\npercentage is below?";
             // 
+            // autoTransferRecycle
+            // 
+            this.autoTransferRecycle.Location = new System.Drawing.Point(15, 319);
+            this.autoTransferRecycle.Name = "autoTransferRecycle";
+            this.autoTransferRecycle.Size = new System.Drawing.Size(240, 43);
+            this.autoTransferRecycle.TabIndex = 15;
+            this.autoTransferRecycle.Text = "Automatically transfer and recycle after hitting max item threshold.";
+            this.autoTransferRecycle.UseVisualStyleBackColor = true;
+            // 
             // GUISettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(267, 410);
+            this.Controls.Add(this.autoTransferRecycle);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.boxMinBerry);
             this.Controls.Add(this.label8);
@@ -233,5 +244,6 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TextBox boxMinBerry;
         private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.CheckBox autoTransferRecycle;
     }
 }

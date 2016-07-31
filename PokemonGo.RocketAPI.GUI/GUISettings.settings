@@ -20,5 +20,8 @@
     <Setting Name="minBerry" Type="System.Single" Scope="User">
       <Value Profile="(Default)">40</Value>
     </Setting>
+    <Setting Name="autoTransferRecycle" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

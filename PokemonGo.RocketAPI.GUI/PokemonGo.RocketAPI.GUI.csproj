@@ -106,6 +106,12 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>GUISettings.settings</DependentUpon>
     </Compile>
+    <Compile Include="ItemsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ItemsForm.Designer.cs">
+      <DependentUpon>ItemsForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="LocationSelector.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -143,6 +149,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GUISettingsForm.resx">
       <DependentUpon>GUISettingsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ItemsForm.resx">
+      <DependentUpon>ItemsForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="LocationSelector.resx">
       <DependentUpon>LocationSelector.cs</DependentUpon>

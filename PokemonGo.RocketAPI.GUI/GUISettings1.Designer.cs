@@ -94,5 +94,17 @@ namespace PokemonGo.RocketAPI.GUI {
                 this["minBerry"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool autoTransferRecycle {
+            get {
+                return ((bool)(this["autoTransferRecycle"]));
+            }
+            set {
+                this["autoTransferRecycle"] = value;
+            }
+        }
     }
 }
