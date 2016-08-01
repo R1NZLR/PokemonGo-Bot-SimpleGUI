@@ -24,12 +24,11 @@ namespace PokemonGo.RocketAPI.Logic
             bool keepPokemonsThatCanEvolve = false, IEnumerable<PokemonId> filter = null)
         {
             var myPokemon = await GetPokemons();
-
             var pokemonList = myPokemon.Where(p => p.DeployedFortId == 0).ToList(); //Don't evolve pokemon in gyms
+
             if (filter != null)
-            {
                 pokemonList = pokemonList.Where(p => !filter.Contains(p.PokemonId)).ToList();
-            }
+            
             if (keepPokemonsThatCanEvolve)
             {
                 var results = new List<PokemonData>();
@@ -77,6 +76,7 @@ namespace PokemonGo.RocketAPI.Logic
         {
             var myPokemon = await GetPokemons();
             var pokemons = myPokemon.ToList();
+
             return pokemons.OrderByDescending(x => x.Cp).ThenBy(n => n.StaminaMax).Take(limit);
         }
 
@@ -84,6 +84,7 @@ namespace PokemonGo.RocketAPI.Logic
         {
             var myPokemon = await GetPokemons();
             var pokemons = myPokemon.ToList();
+
             return pokemons.OrderByDescending(Logic.CalculatePokemonPerfection).Take(limit);
         }
 
@@ -91,6 +92,7 @@ namespace PokemonGo.RocketAPI.Logic
         {
             var myPokemon = await GetPokemons();
             var pokemons = myPokemon.ToList();
+
             return pokemons.Where(x => x.PokemonId == pokemon.PokemonId)
                 .OrderByDescending(x => x.Cp)
                 .First();
@@ -99,12 +101,14 @@ namespace PokemonGo.RocketAPI.Logic
         public async Task<int> GetItemAmountByType(MiscEnums.Item type)
         {
             var pokeballs = await GetItems();
+
             return pokeballs.FirstOrDefault(i => (MiscEnums.Item) i.Item_ == type)?.Count ?? 0;
         }
 
         public async Task<IEnumerable<Item>> GetItems()
         {
             var inventory = await _client.GetInventory();
+
             return inventory.InventoryDelta.InventoryItems
                 .Select(i => i.InventoryItemData?.Item)
                 .Where(p => p != null);
@@ -113,6 +117,7 @@ namespace PokemonGo.RocketAPI.Logic
         public async Task<IEnumerable<PokedexEntry>> GetPokedexEntries()
         {
             var inventory = await _client.GetInventory();
+
             return inventory.InventoryDelta.InventoryItems.Select(i => i.InventoryItemData.PokedexEntry);
         }
 
@@ -135,6 +140,7 @@ namespace PokemonGo.RocketAPI.Logic
         public async Task<IEnumerable<PlayerStats>> GetPlayerStats()
         {
             var inventory = await _client.GetInventory();
+
             return inventory.InventoryDelta.InventoryItems
                 .Select(i => i.InventoryItemData?.PlayerStats)
                 .Where(p => p != null);
@@ -143,6 +149,7 @@ namespace PokemonGo.RocketAPI.Logic
         public async Task<IEnumerable<PokemonFamily>> GetPokemonFamilies()
         {
             var inventory = await _client.GetInventory();
+
             return
                 inventory.InventoryDelta.InventoryItems.Select(i => i.InventoryItemData?.PokemonFamily)
                     .Where(p => p != null && p.FamilyId != PokemonFamilyId.FamilyUnset);
@@ -151,6 +158,7 @@ namespace PokemonGo.RocketAPI.Logic
         public async Task<IEnumerable<PokemonData>> GetPokemons()
         {
             var inventory = await _client.GetInventory();
+
             return
                 inventory.InventoryDelta.InventoryItems.Select(i => i.InventoryItemData?.Pokemon)
                     .Where(p => p != null && p.PokemonId > 0);
@@ -159,6 +167,7 @@ namespace PokemonGo.RocketAPI.Logic
         public async Task<IEnumerable<PokemonSettings>> GetPokemonSettings()
         {
             var templates = await _client.GetItemTemplates();
+
             return
                 templates.ItemTemplates.Select(i => i.PokemonSettings)
                     .Where(p => p != null && p.FamilyId != PokemonFamilyId.FamilyUnset);
@@ -169,21 +178,16 @@ namespace PokemonGo.RocketAPI.Logic
         {
             var myPokemons = await GetPokemons();
             myPokemons = myPokemons.Where(p => p.DeployedFortId == 0).OrderBy(p => p.Cp); //Don't evolve pokemon in gyms
-            if (filter != null)
-            {
-                myPokemons = myPokemons.Where(p => filter.Contains(p.PokemonId));
-            }
-            var pokemons = myPokemons.ToList();
 
-            await Task.Delay(500);
+            if (filter != null)
+                myPokemons = myPokemons.Where(p => filter.Contains(p.PokemonId));
+            
+            var pokemons = myPokemons.ToList().OrderByDescending(pokemon => pokemon.PokemonId).ThenByDescending(pokemon => pokemon.Cp);
+            
             var myPokemonSettings = await GetPokemonSettings();
             var pokemonSettings = myPokemonSettings.ToList();
-
-            await Task.Delay(500);
             var myPokemonFamilies = await GetPokemonFamilies();
             var pokemonFamilies = myPokemonFamilies.ToArray();
-
-            await Task.Delay(500);
             var myPokedexEntries = await GetPokedexEntries();
             var pokedexEntries = myPokedexEntries.ToList();
 
@@ -195,6 +199,7 @@ namespace PokemonGo.RocketAPI.Logic
                 var settings = pokemonSettings.Single(x => x.PokemonId == pokemon.PokemonId);
                 var familyCandy = pokemonFamilies.Single(x => settings.FamilyId == x.FamilyId);
                 var nextEvolution = settings.EvolutionIds.FirstOrDefault();
+                var totalEvolutions = pokemonSettings.Count(ps => ps.FamilyId == settings.FamilyId && ps.PokemonId != settings.PokemonId);
                 var evolutionCapturedCount =
                     pokedexEntries.FirstOrDefault(x => x?.PokedexEntryNumber == (int)nextEvolution)?.TimesCaptured;
 
@@ -205,19 +210,23 @@ namespace PokemonGo.RocketAPI.Logic
                     continue;
                 }
 
-                if (settings.ParentPokemonId != PokemonId.Missingno)
-                {
+                if (settings.ParentPokemonId != PokemonId.Missingno && evolutionCapturedCount > 0)
                     pokemonToExclude.Add(settings.PokemonId);
-                }
-
+                
                 var pokemonCandyNeededAlready =
                     pokemonToEvolve.Count(
                         p => pokemonSettings.Single(x => x.PokemonId == p.PokemonId).FamilyId == settings.FamilyId)*
                     settings.CandyToEvolve;
+
                 if (familyCandy.Candy - pokemonCandyNeededAlready > settings.CandyToEvolve)
+                {
+                    if (evolutionCapturedCount == 0 || evolutionCapturedCount == null && totalEvolutions > 1)
+                        pokemonToExclude.Add(settings.PokemonId);
+                    
                     pokemonToEvolve.Add(pokemon);
+                }
                 else
-                    pokemonToExclude.Remove(PokemonId.Charmeleon);
+                    pokemonToExclude.Remove(settings.PokemonId);
             }
 
             return pokemonToEvolve;
