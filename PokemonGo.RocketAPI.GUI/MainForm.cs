@@ -89,7 +89,6 @@ namespace PokemonGo.RocketAPI.GUI
                 await DisplayLoginWindow();                
                 DisplayPositionSelector();
                 await GetCurrentPlayerInformation();
-                await _inventory.GetPokemonToEvolve();
                 await PreflightCheck();
             }
             catch (Exception ex)

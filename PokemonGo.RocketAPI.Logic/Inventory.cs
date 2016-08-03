@@ -49,6 +49,7 @@ namespace PokemonGo.RocketAPI.Logic
                         continue;
 
                     var amountToSkip = familyCandy.Candy/settings.CandyToEvolve;
+                    amountToSkip = amountToSkip == 0 ? 1 : amountToSkip;
 
                     results.AddRange(pokemonList.Where(x => x.PokemonId == pokemon.Key && x.Favorite == 0)
                         .OrderByDescending(x => x.Cp)
