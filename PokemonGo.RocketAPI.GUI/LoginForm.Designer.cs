@@ -28,19 +28,20 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LoginForm));
             this.btnLogin = new System.Windows.Forms.Button();
             this.boxPassword = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.boxUsername = new System.Windows.Forms.TextBox();
-            this.comboLoginMethod = new System.Windows.Forms.ComboBox();
-            this.label3 = new System.Windows.Forms.Label();
+            this.usernameToolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.cbRemember = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // btnLogin
             // 
-            this.btnLogin.Location = new System.Drawing.Point(240, 179);
+            this.btnLogin.Location = new System.Drawing.Point(310, 114);
             this.btnLogin.Margin = new System.Windows.Forms.Padding(6, 7, 6, 7);
             this.btnLogin.Name = "btnLogin";
             this.btnLogin.Size = new System.Drawing.Size(136, 41);
@@ -55,7 +56,7 @@
             this.boxPassword.Margin = new System.Windows.Forms.Padding(6, 7, 6, 7);
             this.boxPassword.Name = "boxPassword";
             this.boxPassword.PasswordChar = '*';
-            this.boxPassword.Size = new System.Drawing.Size(242, 35);
+            this.boxPassword.Size = new System.Drawing.Size(312, 35);
             this.boxPassword.TabIndex = 1;
             this.boxPassword.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.boxPassword.KeyDown += new System.Windows.Forms.KeyEventHandler(this.boxPassword_KeyDown);
@@ -85,40 +86,34 @@
             this.boxUsername.Location = new System.Drawing.Point(134, 16);
             this.boxUsername.Margin = new System.Windows.Forms.Padding(6, 7, 6, 7);
             this.boxUsername.Name = "boxUsername";
-            this.boxUsername.Size = new System.Drawing.Size(242, 35);
+            this.boxUsername.Size = new System.Drawing.Size(312, 35);
             this.boxUsername.TabIndex = 0;
             this.boxUsername.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // comboLoginMethod
+            // usernameToolTip
             // 
-            this.comboLoginMethod.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboLoginMethod.FormattingEnabled = true;
-            this.comboLoginMethod.Items.AddRange(new object[] {
-            "Ptc",
-            "Google"});
-            this.comboLoginMethod.Location = new System.Drawing.Point(134, 114);
-            this.comboLoginMethod.Margin = new System.Windows.Forms.Padding(3, 7, 3, 3);
-            this.comboLoginMethod.Name = "comboLoginMethod";
-            this.comboLoginMethod.Size = new System.Drawing.Size(242, 38);
-            this.comboLoginMethod.TabIndex = 2;
+            this.usernameToolTip.Tag = "Enter your PTC or Google Account the application will know which Authentication m" +
+    "ethod to use.";
+            this.usernameToolTip.ToolTipTitle = "Google Auth / PTC";
             // 
-            // label3
+            // cbRemember
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(9, 114);
-            this.label3.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(86, 30);
-            this.label3.TabIndex = 7;
-            this.label3.Text = "Method";
+            this.cbRemember.AutoSize = true;
+            this.cbRemember.Checked = true;
+            this.cbRemember.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbRemember.Location = new System.Drawing.Point(14, 118);
+            this.cbRemember.Name = "cbRemember";
+            this.cbRemember.Size = new System.Drawing.Size(277, 34);
+            this.cbRemember.TabIndex = 6;
+            this.cbRemember.Text = "Remember my credentials.";
+            this.cbRemember.UseVisualStyleBackColor = true;
             // 
             // LoginForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(397, 235);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.comboLoginMethod);
+            this.ClientSize = new System.Drawing.Size(461, 171);
+            this.Controls.Add(this.cbRemember);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.btnLogin);
             this.Controls.Add(this.boxUsername);
@@ -131,6 +126,7 @@
             this.Name = "LoginForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Select Login Method";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.LoginForm_FormClosing);
             this.Load += new System.EventHandler(this.LoginForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -143,7 +139,7 @@
         private System.Windows.Forms.Label label2;
         public System.Windows.Forms.TextBox boxPassword;
         public System.Windows.Forms.TextBox boxUsername;
-        private System.Windows.Forms.ComboBox comboLoginMethod;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.ToolTip usernameToolTip;
+        private System.Windows.Forms.CheckBox cbRemember;
     }
 }

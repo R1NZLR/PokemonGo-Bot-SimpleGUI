@@ -17,19 +17,6 @@ namespace PokemonGo.RocketAPI.GUI
             InitializeComponent();
         }
 
-        private void GUISettings_Load(object sender, EventArgs e)
-        {
-            boxPokestopDelay.Text = GUISettings.Default.pokestopDelay.ToString();
-            boxPokemonDelay.Text = GUISettings.Default.pokemonDelay.ToString();
-            
-            boxCPMin.Text = GUISettings.Default.minCP.ToString();
-            boxIVMin.Text = GUISettings.Default.minIV.ToString();
-            boxMinBerry.Text = GUISettings.Default.minBerry.ToString();
-
-            checkAutoTransfer.Checked = GUISettings.Default.autoEvolveTransfer;
-            autoTransferRecycle.Checked = GUISettings.Default.autoTransferRecycle;
-        }
-
         private void btnSaveSettings_Click(object sender, EventArgs e)
         {
             try
@@ -41,8 +28,13 @@ namespace PokemonGo.RocketAPI.GUI
                 GUISettings.Default.minIV = int.Parse(boxIVMin.Text);
                 GUISettings.Default.minBerry = int.Parse(boxMinBerry.Text);
 
-                GUISettings.Default.autoEvolveTransfer = checkAutoTransfer.Checked;
-                GUISettings.Default.autoTransferRecycle = autoTransferRecycle.Checked;
+                GUISettings.Default.autoEvolve = checkAutoEvolve.Checked;
+                GUISettings.Default.autoTransfer = checkAutoTransfer.Checked;
+
+                GUISettings.Default.humanWalkingEnabled = checkHumanWalking.Checked;
+                GUISettings.Default.humanWalkingSpeed = double.Parse(boxHumanWalkingSpeed.Text);
+
+                GUISettings.Default.enableSilentRecycle = checkSilentRecycle.Checked;
 
                 GUISettings.Default.Save();
                 this.Close();
@@ -51,6 +43,24 @@ namespace PokemonGo.RocketAPI.GUI
             {
                 MessageBox.Show("You have invalid data in your settings.", "PoGo Bot");
             }
+        }
+
+        private void GUISettingsForm_Load(object sender, EventArgs e)
+        {
+            boxPokestopDelay.Text = GUISettings.Default.pokestopDelay.ToString();
+            boxPokemonDelay.Text = GUISettings.Default.pokemonDelay.ToString();
+
+            boxCPMin.Text = GUISettings.Default.minCP.ToString();
+            boxIVMin.Text = GUISettings.Default.minIV.ToString();
+            boxMinBerry.Text = GUISettings.Default.minBerry.ToString();
+
+            checkAutoEvolve.Checked = GUISettings.Default.autoEvolve;
+            checkAutoTransfer.Checked = GUISettings.Default.autoTransfer;
+
+            checkHumanWalking.Checked = GUISettings.Default.humanWalkingEnabled;
+            boxHumanWalkingSpeed.Text = GUISettings.Default.humanWalkingSpeed.ToString();
+
+            checkSilentRecycle.Checked = GUISettings.Default.enableSilentRecycle;
         }
     }
 }

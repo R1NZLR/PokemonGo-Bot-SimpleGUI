@@ -37,7 +37,7 @@ namespace PokemonGo.RocketAPI.GUI {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("pw")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string PtcPassword {
             get {
                 return ((string)(this["PtcPassword"]));

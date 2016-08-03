@@ -150,7 +150,26 @@ namespace PokemonGo.RocketAPI
             var releasePokemonRequest = RequestBuilder.GetRequest(_unknownAuth, CurrentLat, CurrentLng, CurrentAltitude,
                 new Request.Types.Requests
                 {
-                    Type = (int) RequestType.EVOLVE_POKEMON,
+                    Type = (int)RequestType.EVOLVE_POKEMON,
+                    Message = customRequest.ToByteString()
+                });
+            return
+                await
+                    _httpClient.PostProtoPayload<Request, EvolvePokemonOut>($"https://{_apiUrl}/rpc",
+                        releasePokemonRequest);
+        }
+
+        public async Task<EvolvePokemonOut> PowerUpPokemon(ulong pokemonId)
+        {
+            var customRequest = new EvolvePokemon
+            {
+                PokemonId = pokemonId
+            };
+
+            var releasePokemonRequest = RequestBuilder.GetRequest(_unknownAuth, CurrentLat, CurrentLng, CurrentAltitude,
+                new Request.Types.Requests
+                {
+                    Type = (int)RequestType.UPGRADE_POKEMON,
                     Message = customRequest.ToByteString()
                 });
             return

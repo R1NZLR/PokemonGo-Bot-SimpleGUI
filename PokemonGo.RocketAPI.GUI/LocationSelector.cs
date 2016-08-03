@@ -1,4 +1,5 @@
 ﻿using GMap.NET.MapProviders;
+using PokemonGo.RocketAPI.GUI.Helpers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -37,6 +38,7 @@ namespace PokemonGo.RocketAPI.GUI
         private void addGoodFarmingLocations()
         {
             // Good Farming Locations (Create Issue in GutHub to Add More)
+            // Removed nests (Migration)
             comboLocations.Items.Add(new Loc() { name = "London, England", lat = 51.501663, lng = -0.14102 });
             comboLocations.Items.Add(new Loc() { name = "Myrtle Beach, SC, USA", lat = 33.714451, lng = -78.877194 });
             comboLocations.Items.Add(new Loc() { name = "Santa Monica Pier, LA, USA", lat = 34.00873594425199, lng = -118.49761247634888 });
@@ -50,6 +52,7 @@ namespace PokemonGo.RocketAPI.GUI
             comboLocations.Items.Add(new Loc() { name = "Dusseldorf, Germany", lat = 51.224382, lng = 6.778896   });
             comboLocations.Items.Add(new Loc() { name = "Tokyo, Japan", lat = 35.69051125265253, lng = 139.68954205513 });
             comboLocations.Items.Add(new Loc() { name = "Disneyland Park", lat = 33.8120962, lng = -117.9189742 });
+            comboLocations.Items.Add(new Loc() { name = "Times Square, NY, USA", lat = 40.758838, lng = -73.985270 });
         }        
 
         private void LocationSelector_Load(object sender, EventArgs e)
@@ -118,9 +121,10 @@ namespace PokemonGo.RocketAPI.GUI
                 // Close this Window
                 this.Hide();
             }
-            catch
+            catch (Exception ex)
             {
                 MessageBox.Show("Invalid Data on Lat/Lng", "PoGo Bot");
+                ErrorReportCreator.Create("SetLocationErrorLog", "Error while picking the location", ex);
             }
         }
 

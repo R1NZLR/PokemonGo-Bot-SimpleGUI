@@ -5,7 +5,7 @@ using GeoCoordinatePortable;
 
 #endregion
 
-namespace PokemonGo.RocketAPI.Logic.Utils
+namespace PokemonGo.RocketAPI.GUI.Helpers
 {
     public static class LocationUtils
     {

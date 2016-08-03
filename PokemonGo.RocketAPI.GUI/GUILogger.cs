@@ -28,7 +28,7 @@ namespace PokemonGo.RocketAPI.GUI
             if (level > maxLogLevel)
                 return;
 
-            loggingBox.AppendText($"[{ DateTime.Now.ToString("HH:mm:ss")}] { message}" + Environment.NewLine);
+            loggingBox.AppendText(Environment.NewLine + $"[{ DateTime.Now.ToString("HH:mm:ss")}] { message}");
         }
     }
 }

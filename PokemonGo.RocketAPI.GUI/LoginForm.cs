@@ -1,4 +1,5 @@
 ﻿using PokemonGo.RocketAPI.Enums;
+using PokemonGo.RocketAPI.GUI.Helpers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -22,9 +23,16 @@ namespace PokemonGo.RocketAPI.GUI
         }
 
         private void LoginForm_Load(object sender, EventArgs e)
-        {
-            // Set the First Method
-            comboLoginMethod.SelectedIndex = 0;
+        {            
+            boxUsername.Text = GUISettings.Default.username;
+            boxPassword.Text = GUISettings.Default.password;
+
+            if( GUISettings.Default.newLoginMethodFirstTimeSee )
+            {
+                MessageBox.Show("Enter your Google account or PTC, the program will know which one to use.", "PoGo Bot");
+                GUISettings.Default.newLoginMethodFirstTimeSee = false;
+                GUISettings.Default.Save();
+            }
         }
 
         private void btnLogin_Click(object sender, EventArgs e)
@@ -33,8 +41,27 @@ namespace PokemonGo.RocketAPI.GUI
             {
                 if (!string.IsNullOrWhiteSpace(boxPassword.Text))
                 {
+                    if (cbRemember.Checked)
+                    {
+                        GUISettings.Default.username = boxUsername.Text;
+                        GUISettings.Default.password = boxPassword.Text;
+                        GUISettings.Default.Save();
+                    }
+                    else
+                    {
+                        GUISettings.Default.username = string.Empty;
+                        GUISettings.Default.password = string.Empty;
+                        GUISettings.Default.Save();
+                    }
+
                     loginSelected = true;
-                    auth = (AuthType) Enum.Parse(typeof(AuthType), comboLoginMethod.SelectedItem.ToString());
+
+                    // Google Accounts use Email / PTC don't.
+                    if (boxUsername.Text.Contains('@'))
+                        auth = AuthType.Google;
+                    else
+                        auth = AuthType.Ptc;
+
                     this.Hide();
                 }
                 else
@@ -52,6 +79,11 @@ namespace PokemonGo.RocketAPI.GUI
         {
             if (e.KeyCode == Keys.Enter)
                 btnLogin_Click(null, null);
+        }
+
+        private void LoginForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+
         }
     }
 }

@@ -14,13 +14,31 @@
     <Setting Name="minIV" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">85</Value>
     </Setting>
-    <Setting Name="autoEvolveTransfer" Type="System.Boolean" Scope="User">
+    <Setting Name="autoEvolve" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="minBerry" Type="System.Single" Scope="User">
       <Value Profile="(Default)">40</Value>
     </Setting>
-    <Setting Name="autoTransferRecycle" Type="System.Boolean" Scope="User">
+    <Setting Name="username" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="password" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="newLoginMethodFirstTimeSee" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="autoTransfer" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="humanWalkingEnabled" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="humanWalkingSpeed" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">5</Value>
+    </Setting>
+    <Setting Name="enableSilentRecycle" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>

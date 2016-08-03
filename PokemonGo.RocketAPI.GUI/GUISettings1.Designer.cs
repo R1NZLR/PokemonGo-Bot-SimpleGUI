@@ -74,12 +74,12 @@ namespace PokemonGo.RocketAPI.GUI {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool autoEvolveTransfer {
+        public bool autoEvolve {
             get {
-                return ((bool)(this["autoEvolveTransfer"]));
+                return ((bool)(this["autoEvolve"]));
             }
             set {
-                this["autoEvolveTransfer"] = value;
+                this["autoEvolve"] = value;
             }
         }
         
@@ -97,13 +97,85 @@ namespace PokemonGo.RocketAPI.GUI {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool autoTransferRecycle {
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string username {
             get {
-                return ((bool)(this["autoTransferRecycle"]));
+                return ((string)(this["username"]));
             }
             set {
-                this["autoTransferRecycle"] = value;
+                this["username"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string password {
+            get {
+                return ((string)(this["password"]));
+            }
+            set {
+                this["password"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool newLoginMethodFirstTimeSee {
+            get {
+                return ((bool)(this["newLoginMethodFirstTimeSee"]));
+            }
+            set {
+                this["newLoginMethodFirstTimeSee"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool autoTransfer {
+            get {
+                return ((bool)(this["autoTransfer"]));
+            }
+            set {
+                this["autoTransfer"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool humanWalkingEnabled {
+            get {
+                return ((bool)(this["humanWalkingEnabled"]));
+            }
+            set {
+                this["humanWalkingEnabled"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        public double humanWalkingSpeed {
+            get {
+                return ((double)(this["humanWalkingSpeed"]));
+            }
+            set {
+                this["humanWalkingSpeed"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool enableSilentRecycle {
+            get {
+                return ((bool)(this["enableSilentRecycle"]));
+            }
+            set {
+                this["enableSilentRecycle"] = value;
             }
         }
     }
