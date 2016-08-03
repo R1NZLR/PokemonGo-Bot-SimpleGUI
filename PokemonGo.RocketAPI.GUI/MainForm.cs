@@ -927,7 +927,7 @@ namespace PokemonGo.RocketAPI.GUI
                     return;
                 }
 
-                if (GUISettings.Default.autoTransferRecycle && ItemCount >= 350)
+                if (GUISettings.Default.autoTransfer && ItemCount >= 350)
                 {
                     await TransferDuplicatePokemon(true);
                     await RecycleItems();
@@ -943,8 +943,7 @@ namespace PokemonGo.RocketAPI.GUI
             var mapObjects = await _client.GetMapObjects();
             var pokemons = mapObjects.MapCells.SelectMany(i => i.CatchablePokemons);
             var mapPokemons = pokemons as IList<MapPokemon> ?? pokemons.ToList();
-
-            var mapPokemons = pokemons as IList<MapPokemon> ?? pokemons.ToList();
+            
             if (mapPokemons.Count<MapPokemon>() > 0)
                 Logger.Write("Found " + mapPokemons.Count<MapPokemon>() + " Pokemons in the area.");
             foreach (var pokemon in mapPokemons)
