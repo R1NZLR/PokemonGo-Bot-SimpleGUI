@@ -29,11 +29,12 @@ namespace PokemonGo.RocketAPI.GUI
         private Settings _settings;
         private Inventory _inventory;
         private GetPlayerResponse _profile;
-        protected int ItemCount;
+        protected int PokemonCount;
 
         // Persisting Pokemon / Storage Sizes
         private int itemStorageSize;
         private int pokemonStorageSize;
+        private int maxNumberOfEggs = 9;
 
         // Persisting Login Info
         private bool _loginSuccess = false;
@@ -557,6 +558,7 @@ namespace PokemonGo.RocketAPI.GUI
             // Get Pokemons and Inventory
             var myItems = await _inventory.GetItems();
             var myPokemons = await _inventory.GetPokemons();
+            PokemonCount = myPokemons.Count();
 
             // Write to Console
             var items = myItems as IList<Item> ?? myItems.ToList();
@@ -788,15 +790,16 @@ namespace PokemonGo.RocketAPI.GUI
             try
             {
                 var items = await _inventory.GetItemsToRecycle(_settings);
+
                 foreach (var item in items)
                 {
-                    var transfer = await _client.RecycleItem((ItemId)item.Item_, item.Count);
+                    await _client.RecycleItem((ItemId)item.Item_, item.Count);
                     await Task.Delay(500);
                 }
             }
-            catch(Exception)
+            catch (Exception)
             {
-
+                // ignored
             }
         }
 
@@ -884,12 +887,13 @@ namespace PokemonGo.RocketAPI.GUI
                 // Use Teleporting if No Human Walking Enabled
                 if (!GUISettings.Default.humanWalkingEnabled)
                 {
-                    var update = await _client.UpdatePlayerLocation(pokeStop.Latitude, pokeStop.Longitude, _settings.DefaultAltitude); // Redundant?
+                    await _client.UpdatePlayerLocation(pokeStop.Latitude, pokeStop.Longitude, _settings.DefaultAltitude);
                     UpdateMap(pokeStop.Latitude, pokeStop.Longitude);
-                } else
+                }
+                else
                 {
-                    HumanWalking human = new HumanWalking(_client);
-                    GeoCoordinate targetLocation = new GeoCoordinate(pokeStop.Latitude, pokeStop.Longitude);
+                    var human = new HumanWalking(_client);
+                    var targetLocation = new GeoCoordinate(pokeStop.Latitude, pokeStop.Longitude);
                     human.assignMapToUpdate(MainMap);
                     await human.Walk(targetLocation, GUISettings.Default.humanWalkingSpeed, ExecuteCatchAllNearbyPokemons);
                 }               
@@ -927,10 +931,9 @@ namespace PokemonGo.RocketAPI.GUI
                     return;
                 }
 
-                if (GUISettings.Default.autoTransfer && ItemCount >= 350)
+                if (GUISettings.Default.autoTransfer && PokemonCount >= pokemonStorageSize - maxNumberOfEggs)
                 {
                     await TransferDuplicatePokemon(true);
-                    await RecycleItems();
                 }
 
                 Logger.Write("Waiting before moving to the next Pokestop.");
@@ -943,9 +946,10 @@ namespace PokemonGo.RocketAPI.GUI
             var mapObjects = await _client.GetMapObjects();
             var pokemons = mapObjects.MapCells.SelectMany(i => i.CatchablePokemons);
             var mapPokemons = pokemons as IList<MapPokemon> ?? pokemons.ToList();
-            
-            if (mapPokemons.Count<MapPokemon>() > 0)
-                Logger.Write("Found " + mapPokemons.Count<MapPokemon>() + " Pokemons in the area.");
+
+            if (mapPokemons.Any())
+                Logger.Write("Found " + mapPokemons.Count + " Pokemons in the area.");
+
             foreach (var pokemon in mapPokemons)
             {
                 await _client.UpdatePlayerLocation(pokemon.Latitude, pokemon.Longitude, _settings.DefaultAltitude);
@@ -1022,8 +1026,8 @@ namespace PokemonGo.RocketAPI.GUI
             }
         }
 
-
         private bool ForceUnbanning = false;
+
         private async Task ForceUnban()
         {
             if (!ForceUnbanning)
