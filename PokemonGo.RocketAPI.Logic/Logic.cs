@@ -7,10 +7,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using PokemonGo.RocketAPI.Enums;
 using PokemonGo.RocketAPI.Exceptions;
-using PokemonGo.RocketAPI.Extensions;
-using PokemonGo.RocketAPI.GeneratedCode;
 using PokemonGo.RocketAPI.Helpers;
-using PokemonGo.RocketAPI.Logic.Utils;
+using POGOProtos.Data;
+using POGOProtos.Enums;
+using POGOProtos.Inventory.Item;
+using POGOProtos.Map.Pokemon;
+using POGOProtos.Networking.Requests.Messages;
+using POGOProtos.Networking.Responses;
 
 #endregion
 
@@ -27,7 +30,7 @@ namespace PokemonGo.RocketAPI.Logic
         public Logic(ISettings clientSettings)
         {
             _clientSettings = clientSettings;
-            _client = new Client(_clientSettings);
+            _client = new Client(_clientSettings, clientSettings.PtcUsername, clientSettings.PtcPassword);
             _inventory = new Inventory(_client);
             _navigation = new Navigation(_client);
         }
@@ -42,8 +45,8 @@ namespace PokemonGo.RocketAPI.Logic
 
         private async Task DisplayPlayerLevelInTitle(bool updateOnly = false)
         {
-            _playerProfile = _playerProfile.Profile != null ? _playerProfile : await _client.GetProfile();
-            var playerName = _playerProfile.Profile.Username ?? "";
+            _playerProfile = _playerProfile.PlayerData != null ? _playerProfile : await _client.GetProfile();
+            var playerName = _playerProfile.PlayerData.Username ?? "";
             var playerStats = await _inventory.GetPlayerStats();
             var playerStat = playerStats.FirstOrDefault();
             if (playerStat != null)
@@ -147,9 +150,9 @@ namespace PokemonGo.RocketAPI.Logic
             {
                 var evolvePokemonOutProto = await _client.EvolvePokemon(pokemon.Id);
 
-                if (evolvePokemonOutProto.Result == EvolvePokemonOut.Types.EvolvePokemonStatus.PokemonEvolvedSuccess)
+                if (evolvePokemonOutProto.Result == EvolvePokemonResponse.Types.Result.Success)
                 {
-                    Logger.Write($"{pokemon.PokemonId} successfully for {evolvePokemonOutProto.ExpAwarded}xp",
+                    Logger.Write($"{pokemon.PokemonId} successfully for {evolvePokemonOutProto.ExperienceAwarded}xp",
                         LogLevel.Evolve);
                     await DisplayPlayerLevelInTitle(true);
                 }
@@ -176,9 +179,9 @@ namespace PokemonGo.RocketAPI.Logic
                 try
                 {
                     if (_clientSettings.AuthType == AuthType.Ptc)
-                        await _client.DoPtcLogin(_clientSettings.PtcUsername, _clientSettings.PtcPassword);
+                        await _client.DoPtcLogin();
                     else if (_clientSettings.AuthType == AuthType.Google)
-                        _client.DoGoogleLogin("", "");
+                        _client.DoGoogleLogin();
 
                     await _client.SetServer();
 
@@ -228,42 +231,6 @@ namespace PokemonGo.RocketAPI.Logic
             }
         }
 
-        private async Task<MiscEnums.Item> GetBestBall(WildPokemon pokemon)
-        {
-            var pokemonCp = pokemon?.PokemonData?.Cp;
-
-            var pokeBallsCount = await _inventory.GetItemAmountByType(MiscEnums.Item.ITEM_POKE_BALL);
-            var greatBallsCount = await _inventory.GetItemAmountByType(MiscEnums.Item.ITEM_GREAT_BALL);
-            var ultraBallsCount = await _inventory.GetItemAmountByType(MiscEnums.Item.ITEM_ULTRA_BALL);
-            var masterBallsCount = await _inventory.GetItemAmountByType(MiscEnums.Item.ITEM_MASTER_BALL);
-
-            if (masterBallsCount > 0 && pokemonCp >= 2000)
-                return MiscEnums.Item.ITEM_MASTER_BALL;
-            if (ultraBallsCount > 0 && pokemonCp >= 2000)
-                return MiscEnums.Item.ITEM_ULTRA_BALL;
-            if (greatBallsCount > 0 && pokemonCp >= 2000)
-                return MiscEnums.Item.ITEM_GREAT_BALL;
-
-            if (ultraBallsCount > 0 && pokemonCp >= 1000)
-                return MiscEnums.Item.ITEM_ULTRA_BALL;
-            if (greatBallsCount > 0 && pokemonCp >= 1000)
-                return MiscEnums.Item.ITEM_GREAT_BALL;
-
-            if (greatBallsCount > 0 && pokemonCp >= 300)
-                return MiscEnums.Item.ITEM_GREAT_BALL;
-
-            if (pokeBallsCount > 0)
-                return MiscEnums.Item.ITEM_POKE_BALL;
-            if (greatBallsCount > 0)
-                return MiscEnums.Item.ITEM_GREAT_BALL;
-            if (ultraBallsCount > 0)
-                return MiscEnums.Item.ITEM_ULTRA_BALL;
-            if (masterBallsCount > 0)
-                return MiscEnums.Item.ITEM_MASTER_BALL;
-
-            return MiscEnums.Item.ITEM_UNKNOWN;
-        }
-
         public async Task PostLoginExecute()
         {
             while (true)
@@ -275,17 +242,7 @@ namespace PokemonGo.RocketAPI.Logic
                 if (_clientSettings.TransferDuplicatePokemon) await TransferDuplicatePokemon();
                 await DisplayHighests();
                 await RecycleItems();
-
-                /*
-            * Example calls below
-            *
-            var profile = await _client.GetProfile();
-            var settings = await _client.GetSettings();
-            var mapObjects = await _client.GetMapObjects();
-            var inventory = await _client.GetInventory();
-            var pokemons = inventory.InventoryDelta.InventoryItems.Select(i => i.InventoryItemData?.Pokemon).Where(p => p != null && p?.PokemonId > 0);
-            */
-
+                
                 await Task.Delay(10000);
             }
         }
@@ -296,8 +253,8 @@ namespace PokemonGo.RocketAPI.Logic
 
             foreach (var item in items)
             {
-                var transfer = await _client.RecycleItem((ItemId) item.Item_, item.Count);
-                Logger.Write($"{item.Count}x {item.Item_}", LogLevel.Recycling);
+                await _client.RecycleItem(item.ItemId, item.Count);
+                Logger.Write($"{item.Count}x {item.ItemId}", LogLevel.Recycling);
                 await Task.Delay(500);
             }
         }
@@ -333,7 +290,7 @@ namespace PokemonGo.RocketAPI.Logic
         public async Task UseBerry(ulong encounterId, string spawnPointId)
         {
             var inventoryBalls = await _inventory.GetItems();
-            var berries = inventoryBalls.Where(p => (ItemId) p.Item_ == ItemId.ItemRazzBerry);
+            var berries = inventoryBalls.Where(p => p.ItemId == ItemId.ItemRazzBerry);
             var berry = berries.FirstOrDefault();
 
             if (berry == null)

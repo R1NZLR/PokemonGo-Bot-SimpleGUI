@@ -2,7 +2,8 @@
 
 using System.Collections.Generic;
 using PokemonGo.RocketAPI.Enums;
-using PokemonGo.RocketAPI.GeneratedCode;
+using POGOProtos.Enums;
+using POGOProtos.Inventory.Item;
 
 #endregion
 

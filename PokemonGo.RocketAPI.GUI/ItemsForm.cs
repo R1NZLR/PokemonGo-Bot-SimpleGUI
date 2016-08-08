@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using PokemonGo.RocketAPI.GeneratedCode;
 using PokemonGo.RocketAPI.Logic;
+using POGOProtos.Inventory.Item;
 
 namespace PokemonGo.RocketAPI.GUI
 {
@@ -28,7 +23,7 @@ namespace PokemonGo.RocketAPI.GUI
         {
             var myItems = await _inventory.GetItems();
 
-            var items = myItems as IList<Item> ?? myItems.ToList();
+            var items = myItems as IList<ItemData> ?? myItems.ToList();
             luckyEggCount.Text = GetItemCount(items, ItemId.ItemLuckyEgg);
             incenseCount.Text = GetItemCount(items, ItemId.ItemIncenseOrdinary);
             potionCount.Text = GetItemCount(items, ItemId.ItemPotion);
@@ -42,9 +37,9 @@ namespace PokemonGo.RocketAPI.GUI
             razzBerryCount.Text = GetItemCount(items, ItemId.ItemRazzBerry);
         }
 
-        private string GetItemCount(IEnumerable<Item> items, ItemId itemId)
+        private string GetItemCount(IEnumerable<ItemData> items, ItemId itemId)
         {
-            return (items.FirstOrDefault(p => (ItemId)p.Item_ == itemId)?.Count ?? 0).ToString();
+            return items.FirstOrDefault(p => p.ItemId == itemId)?.Count.ToString();
         }
     }
 }

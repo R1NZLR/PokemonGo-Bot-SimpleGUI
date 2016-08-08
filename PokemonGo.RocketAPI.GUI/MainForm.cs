@@ -5,19 +5,21 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using PokemonGo.RocketAPI.Enums;
 using PokemonGo.RocketAPI.Logic;
-using PokemonGo.RocketAPI.GeneratedCode;
 using PokemonGo.RocketAPI.Extensions;
 using PokemonGo.RocketAPI.Logic.Utils;
-using System.IO;
 using PokemonGo.RocketAPI.Exceptions;
 using GMap.NET.MapProviders;
 using System.Text.RegularExpressions;
 using System.Text;
 using PokemonGo.RocketAPI.GUI.Helpers;
 using PokemonGo.RocketAPI.GUI.Exceptions;
-using System.Reflection;
 using PokemonGo.RocketAPI.GUI.Navigation;
 using GeoCoordinatePortable;
+using POGOProtos.Data;
+using POGOProtos.Inventory.Item;
+using POGOProtos.Map.Fort;
+using POGOProtos.Map.Pokemon;
+using POGOProtos.Networking.Responses;
 
 namespace PokemonGo.RocketAPI.GUI
 {  
@@ -249,9 +251,12 @@ namespace PokemonGo.RocketAPI.GUI
 
                 // Begin Login
                 Logger.Write("Trying to Login with Google Token...");
-                Client client = new Client(_settings);
-                client.DoGoogleLogin(username, password);
+                Client client = new Client(_settings, username, password);
+                
+                client.DoGoogleLogin();
+
                 await client.SetServer();
+                client.SetRequestBuilder();
 
                 // Server Ready
                 Logger.Write("Connected! Server is Ready.");
@@ -314,9 +319,11 @@ namespace PokemonGo.RocketAPI.GUI
 
                 // Begin Login
                 Logger.Write("Trying to Login with PTC Credentials...");
-                Client client = new Client(_settings);
-                await client.DoPtcLogin(_settings.PtcUsername, _settings.PtcPassword);
+                Client client = new Client(_settings, username, password);
+                await client.DoPtcLogin();
                 await client.SetServer();
+
+                client.SetRequestBuilder();
 
                 // Server Ready
                 Logger.Write("Connected! Server is Ready.");                
@@ -357,11 +364,11 @@ namespace PokemonGo.RocketAPI.GUI
             var myPokemons = await _inventory.GetPokemons();
 
             // Write to Console
-            var items = myItems as IList<Item> ?? myItems.ToList();
+            var items = myItems as IList<ItemData> ?? myItems.ToList();
             var pokemon = myPokemons as IList<PokemonData> ?? myPokemons.ToList();
 
             Logger.Write($"Items in Bag: {items.Select(i => i.Count).Sum()}/{itemStorageSize}.");
-            Logger.Write($"Lucky Eggs in Bag: {items.FirstOrDefault(p => (ItemId)p.Item_ == ItemId.ItemLuckyEgg)?.Count ?? 0 }");
+            Logger.Write($"Lucky Eggs in Bag: {items.FirstOrDefault(p => p.ItemId == ItemId.ItemLuckyEgg)?.Count ?? 0 }");
             Logger.Write($"Pokemons in Bag: {pokemon.Count()}/{pokemonStorageSize}.");
 
             // Checker for Inventory
@@ -456,7 +463,7 @@ namespace PokemonGo.RocketAPI.GUI
                     if (_isFarmingActive && GUISettings.Default.autoTransfer)
                     {
                         // Transfer Duplicates.
-                        await TransferDuplicatePokemon();
+                        await TransferDuplicatePokemon(true);
                     }
                 }
                 catch (InvalidResponseException)
@@ -540,7 +547,7 @@ namespace PokemonGo.RocketAPI.GUI
 
         public async Task GetCurrentPlayerInformation()
         {
-            var playerName = _profile.Profile.Username ?? "";
+            var playerName = _profile.PlayerData.Username ?? "";
             var playerStats = await _inventory.GetPlayerStats();
             var playerStat = playerStats.FirstOrDefault();
             if (playerStat != null)
@@ -561,11 +568,11 @@ namespace PokemonGo.RocketAPI.GUI
             PokemonCount = myPokemons.Count();
 
             // Write to Console
-            var items = myItems as IList<Item> ?? myItems.ToList();
+            var items = myItems as IList<ItemData> ?? myItems.ToList();
             boxInventoryCount.Text = $"{items.Select(i => i.Count).Sum()}/{itemStorageSize}";
             boxPokemonCount.Text = $"{myPokemons.Count()}/{pokemonStorageSize}";
-            boxLuckyEggsCount.Text = (items.FirstOrDefault(p => (ItemId)p.Item_ == ItemId.ItemLuckyEgg)?.Count ?? 0).ToString();
-            boxIncencesCount.Text = (items.FirstOrDefault(p => (ItemId)p.Item_ == ItemId.ItemIncenseOrdinary)?.Count ?? 0).ToString();            
+            boxLuckyEggsCount.Text = (items.FirstOrDefault(p => p.ItemId == ItemId.ItemLuckyEgg)?.Count ?? 0).ToString();
+            boxIncencesCount.Text = (items.FirstOrDefault(p => p.ItemId == ItemId.ItemIncenseOrdinary)?.Count ?? 0).ToString();            
         }
 
         public static int GetXpDiff(int level)
@@ -676,13 +683,13 @@ namespace PokemonGo.RocketAPI.GUI
             {
                 var evolvePokemonOutProto = await _client.EvolvePokemon(pokemon.Id); 
 
-                if (evolvePokemonOutProto.Result == EvolvePokemonOut.Types.EvolvePokemonStatus.PokemonEvolvedSuccess)
+                if (evolvePokemonOutProto.Result == EvolvePokemonResponse.Types.Result.Success)
                 {
-                    Logger.Write($"Evolved {pokemon.PokemonId} successfully for {evolvePokemonOutProto.ExpAwarded}xp");
+                    Logger.Write($"Evolved {pokemon.PokemonId} successfully for {evolvePokemonOutProto.ExperienceAwarded}xp");
 
                     // GUI Experience
-                    _totalExperience += evolvePokemonOutProto.ExpAwarded;
-                    dGrid.Rows.Insert(0, "Evolved", pokemon.PokemonId.ToString(), evolvePokemonOutProto.ExpAwarded);
+                    _totalExperience += evolvePokemonOutProto.ExperienceAwarded;
+                    dGrid.Rows.Insert(0, "Evolved", pokemon.PokemonId.ToString(), evolvePokemonOutProto.ExperienceAwarded);
                 }                    
                 else
                 {
@@ -758,11 +765,11 @@ namespace PokemonGo.RocketAPI.GUI
 
                 foreach (var item in items)
                 {
-                    await _client.RecycleItem((ItemId)item.Item_, item.Count);
-                    Logger.Write($"Recycled {item.Count}x {(ItemId)item.Item_}");
+                    await _client.RecycleItem(item.ItemId, item.Count);
+                    Logger.Write($"Recycled {item.Count}x {item.ItemId}");
 
                     // GUI Experience
-                    dGrid.Rows.Insert(0, "Recycled", item.Count, ((ItemId)item.Item_).ToString());
+                    dGrid.Rows.Insert(0, "Recycled", item.Count, (item.ItemId).ToString());
                 }
 
                 await GetCurrentPlayerInformation();
@@ -793,7 +800,7 @@ namespace PokemonGo.RocketAPI.GUI
 
                 foreach (var item in items)
                 {
-                    await _client.RecycleItem((ItemId)item.Item_, item.Count);
+                    await _client.RecycleItem(item.ItemId, item.Count);
                     await Task.Delay(500);
                 }
             }
@@ -803,37 +810,37 @@ namespace PokemonGo.RocketAPI.GUI
             }
         }
 
-        private async Task<MiscEnums.Item> GetBestBall(int? pokemonCp)
+        private async Task<ItemId> GetBestBall(int? pokemonCp)
         {
-            var pokeBallsCount = await _inventory.GetItemAmountByType(MiscEnums.Item.ITEM_POKE_BALL);
-            var greatBallsCount = await _inventory.GetItemAmountByType(MiscEnums.Item.ITEM_GREAT_BALL);
-            var ultraBallsCount = await _inventory.GetItemAmountByType(MiscEnums.Item.ITEM_ULTRA_BALL);
+            var pokeBallsCount = await _inventory.GetItemAmountByType(ItemId.ItemPokeBall);
+            var greatBallsCount = await _inventory.GetItemAmountByType(ItemId.ItemGreatBall);
+            var ultraBallsCount = await _inventory.GetItemAmountByType(ItemId.ItemUltraBall);
 
             if (ultraBallsCount > 0 && pokemonCp >= 1000)
-                return MiscEnums.Item.ITEM_ULTRA_BALL;
+                return ItemId.ItemUltraBall;
             if (greatBallsCount > 0 && pokemonCp >= 1000)
-                return MiscEnums.Item.ITEM_GREAT_BALL;
+                return ItemId.ItemGreatBall;
 
             if (ultraBallsCount > 0 && pokemonCp >= 600)
-                return MiscEnums.Item.ITEM_ULTRA_BALL;
+                return ItemId.ItemUltraBall;
             if (greatBallsCount > 0 && pokemonCp >= 600)
-                return MiscEnums.Item.ITEM_GREAT_BALL;
+                return ItemId.ItemGreatBall;
 
             if (greatBallsCount > 0 && pokemonCp >= 350)
-                return MiscEnums.Item.ITEM_GREAT_BALL;
+                return ItemId.ItemGreatBall;
 
             if (pokeBallsCount > 0)
-                return MiscEnums.Item.ITEM_POKE_BALL;
+                return ItemId.ItemPokeBall;
             if (greatBallsCount > 0)
-                return MiscEnums.Item.ITEM_GREAT_BALL;
+                return ItemId.ItemGreatBall;
 
-            return ultraBallsCount > 0 ? MiscEnums.Item.ITEM_ULTRA_BALL : MiscEnums.Item.ITEM_POKE_BALL;
+            return ultraBallsCount > 0 ? ItemId.ItemUltraBall : ItemId.ItemPokeBall;
         }
 
         public async Task UseBerry(ulong encounterId, string spawnPointId)
         {
             var inventoryItems = await _inventory.GetItems();
-            var berries = inventoryItems.Where(p => (ItemId)p.Item_ == ItemId.ItemRazzBerry);
+            var berries = inventoryItems.Where(p => p.ItemId == ItemId.ItemRazzBerry);
             var berry = berries.FirstOrDefault();
 
             if (berry == null)
@@ -846,7 +853,7 @@ namespace PokemonGo.RocketAPI.GUI
         public async Task UseLuckyEgg()
         {
             var inventoryItems = await _inventory.GetItems();
-            var luckyEggs = inventoryItems.Where(p => (ItemId)p.Item_ == ItemId.ItemLuckyEgg);
+            var luckyEggs = inventoryItems.Where(p => p.ItemId == ItemId.ItemLuckyEgg);
             var luckyEgg = luckyEggs.FirstOrDefault();
 
             if (luckyEgg == null)
@@ -861,7 +868,7 @@ namespace PokemonGo.RocketAPI.GUI
         public async Task UseIncense()
         {
             var inventoryItems = await _inventory.GetItems();
-            var incenses = inventoryItems.Where(p => (ItemId)p.Item_ == ItemId.ItemIncenseOrdinary);
+            var incenses = inventoryItems.Where(p => p.ItemId == ItemId.ItemIncenseOrdinary);
             var incense = incenses.FirstOrDefault();
 
             if (incense == null)
@@ -876,7 +883,7 @@ namespace PokemonGo.RocketAPI.GUI
         private async Task ExecuteFarmingPokestopsAndPokemons()
         {
             var mapObjects = await _client.GetMapObjects();
-            var pokeStops = mapObjects.MapCells.SelectMany(i => i.Forts).Where(i => i.Type == FortType.Checkpoint && i.CooldownCompleteTimestampMs < DateTime.UtcNow.ToUnixTime());
+            var pokeStops = mapObjects.Item1.MapCells.SelectMany(i => i.Forts).Where(i => i.Type == FortType.Checkpoint && i.CooldownCompleteTimestampMs < DateTime.UtcNow.ToUnixTime());
 
             var fortDatas = pokeStops as IList<FortData> ?? pokeStops.ToList();
             _pokestopsCount = fortDatas.Count;
@@ -944,7 +951,7 @@ namespace PokemonGo.RocketAPI.GUI
         private async Task ExecuteCatchAllNearbyPokemons()
         {
             var mapObjects = await _client.GetMapObjects();
-            var pokemons = mapObjects.MapCells.SelectMany(i => i.CatchablePokemons);
+            var pokemons = mapObjects.Item1.MapCells.SelectMany(i => i.CatchablePokemons);
             var mapPokemons = pokemons as IList<MapPokemon> ?? pokemons.ToList();
 
             if (mapPokemons.Any())
@@ -953,7 +960,7 @@ namespace PokemonGo.RocketAPI.GUI
             foreach (var pokemon in mapPokemons)
             {
                 await _client.UpdatePlayerLocation(pokemon.Latitude, pokemon.Longitude, _settings.DefaultAltitude);
-                var encounterPokemonResponse = await _client.EncounterPokemon(pokemon.EncounterId, pokemon.SpawnpointId);
+                var encounterPokemonResponse = await _client.EncounterPokemon(pokemon.EncounterId, pokemon.SpawnPointId);
                 var pokemonCp = encounterPokemonResponse?.WildPokemon?.PokemonData?.Cp;
                 var pokemonIv = Logic.Logic.CalculatePokemonPerfection(encounterPokemonResponse?.WildPokemon?.PokemonData).ToString("0.00") + "%";
                 var pokeball = await GetBestBall(pokemonCp);
@@ -974,10 +981,10 @@ namespace PokemonGo.RocketAPI.GUI
                 {
                     if (encounterPokemonResponse?.CaptureProbability.CaptureProbability_.First() < (GUISettings.Default.minBerry / 100))
                     {
-                        await UseBerry(pokemon.EncounterId, pokemon.SpawnpointId);
+                        await UseBerry(pokemon.EncounterId, pokemon.SpawnPointId);
                     }
                     
-                    caughtPokemonResponse = await _client.CatchPokemon(pokemon.EncounterId, pokemon.SpawnpointId, pokemon.Latitude, pokemon.Longitude, pokeball);
+                    caughtPokemonResponse = await _client.CatchPokemon(pokemon.EncounterId, pokemon.SpawnPointId, pokemon.Latitude, pokemon.Longitude, pokeball);
                 }
                 while (caughtPokemonResponse.Status == CatchPokemonResponse.Types.CatchStatus.CatchMissed);
 
@@ -987,7 +994,7 @@ namespace PokemonGo.RocketAPI.GUI
                 {
                     // Calculate Experience
                     int fightExperience = 0;
-                    foreach (int exp in caughtPokemonResponse.Scores.Xp)
+                    foreach (int exp in caughtPokemonResponse.CaptureAward.Xp)
                         fightExperience += exp;
                     _totalExperience += fightExperience;
                     Logger.Write("Gained " + fightExperience + " XP.");
@@ -1043,7 +1050,7 @@ namespace PokemonGo.RocketAPI.GUI
                 Logger.Write("Starting force unban...");
 
                 var mapObjects = await _client.GetMapObjects();
-                var pokeStops = mapObjects.MapCells.SelectMany(i => i.Forts).Where(i => i.Type == FortType.Checkpoint && i.CooldownCompleteTimestampMs < DateTime.UtcNow.ToUnixTime());
+                var pokeStops = mapObjects.Item1.MapCells.SelectMany(i => i.Forts).Where(i => i.Type == FortType.Checkpoint && i.CooldownCompleteTimestampMs < DateTime.UtcNow.ToUnixTime());
 
                 await Task.Delay(1000);
                 bool done = false;
@@ -1053,8 +1060,8 @@ namespace PokemonGo.RocketAPI.GUI
                     await _client.UpdatePlayerLocation(pokeStop.Latitude, pokeStop.Longitude, UserSettings.Default.DefaultAltitude);
                     var fortInfo = await _client.GetFort(pokeStop.Id, pokeStop.Latitude, pokeStop.Longitude);
 
-                    if (fortInfo.Name != string.Empty)
-                    {
+                    //if (fortInfo.Name != string.Empty)
+                    //{
                         Logger.Write("Chosen PokeStop " + fortInfo.Name + ", Starting the Process (Should take less than 1 min)");
                         for (int i = 1; i <= 50; i++)
                         {
@@ -1070,7 +1077,7 @@ namespace PokemonGo.RocketAPI.GUI
                                 break;
                             }
                         }
-                    }
+                    //}
 
                     if (!done)
                         Logger.Write("Force unban failed, please try again.");

@@ -61,6 +61,18 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data.HashFunction.Core, Version=1.8.2.2, Culture=neutral, PublicKeyToken=80c9288e394c1322, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Data.HashFunction.Core.1.8.2.2\lib\net45\System.Data.HashFunction.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Data.HashFunction.Interfaces, Version=1.0.0.2, Culture=neutral, PublicKeyToken=80c9288e394c1322, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Data.HashFunction.Interfaces.1.0.0.2\lib\net45\System.Data.HashFunction.Interfaces.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Data.HashFunction.xxHash, Version=1.8.2.2, Culture=neutral, PublicKeyToken=80c9288e394c1322, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Data.HashFunction.xxHash.1.8.2.2\lib\net45\System.Data.HashFunction.xxHash.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
       <Private>True</Private>
@@ -79,19 +91,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\ApiFailureStrategy.cs" />
     <Compile Include="Enums\AuthType.cs" />
-    <Compile Include="Enums\MiscEnums.cs" />
-    <Compile Include="Enums\RequestType.cs" />
     <Compile Include="Exceptions\AccessTokenExpiredException.cs" />
+    <Compile Include="Exceptions\AccountNotVerifiedException.cs" />
     <Compile Include="Exceptions\GoogleException.cs" />
     <Compile Include="Exceptions\GoogleOfflineException.cs" />
     <Compile Include="Exceptions\InvalidResponseException.cs" />
     <Compile Include="Exceptions\PtcOfflineException.cs" />
     <Compile Include="Extensions\DateTimeExtensions.cs" />
-    <Compile Include="GeneratedCode\AllEnum.cs" />
-    <Compile Include="GeneratedCode\Payloads.cs" />
-    <Compile Include="GeneratedCode\Request.cs" />
-    <Compile Include="GeneratedCode\Response.cs" />
     <Compile Include="Helpers\Git.cs" />
     <Compile Include="Helpers\HttpClientHelper.cs" />
     <Compile Include="Helpers\JsonHelper.cs" />
@@ -104,6 +112,7 @@
     <Compile Include="Logger.cs" />
     <Compile Include="Login\GoogleLogin.cs" />
     <Compile Include="Login\GoogleLoginGPSOAuth.cs" />
+    <Compile Include="Login\ILoginType.cs" />
     <Compile Include="Login\PtcLogin.cs" />
     <None Include="app.config">
       <SubType>Designer</SubType>
@@ -119,12 +128,13 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Proto\AllEnum.proto" />
-    <None Include="Proto\Payloads.proto" />
-    <None Include="Proto\Response.proto" />
-    <None Include="Proto\Request.proto" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\PokemonGo.RocketAPI.Protos\PokemonGo.RocketAPI.Protos.csproj">
+      <Project>{a03a7bb2-4f0b-467b-84b2-9a76e6aae6fb}</Project>
+      <Name>PokemonGo.RocketAPI.Protos</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
