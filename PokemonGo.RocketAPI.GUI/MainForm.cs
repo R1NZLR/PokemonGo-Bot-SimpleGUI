@@ -1060,8 +1060,8 @@ namespace PokemonGo.RocketAPI.GUI
                     await _client.UpdatePlayerLocation(pokeStop.Latitude, pokeStop.Longitude, UserSettings.Default.DefaultAltitude);
                     var fortInfo = await _client.GetFort(pokeStop.Id, pokeStop.Latitude, pokeStop.Longitude);
 
-                    //if (fortInfo.Name != string.Empty)
-                    //{
+                    if (fortInfo.Name != string.Empty)
+                    {
                         Logger.Write("Chosen PokeStop " + fortInfo.Name + ", Starting the Process (Should take less than 1 min)");
                         for (int i = 1; i <= 50; i++)
                         {
@@ -1077,9 +1077,9 @@ namespace PokemonGo.RocketAPI.GUI
                                 break;
                             }
                         }
-                    //}
+                }
 
-                    if (!done)
+                if (!done)
                         Logger.Write("Force unban failed, please try again.");
 
                     ForceUnbanning = false;
