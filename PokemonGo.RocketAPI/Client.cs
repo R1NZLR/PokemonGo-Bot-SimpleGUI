@@ -4,7 +4,6 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Runtime.Remoting.Messaging;
 using System.Threading.Tasks;
 using Google.Protobuf;
 using PokemonGo.RocketAPI.Enums;
@@ -12,7 +11,6 @@ using PokemonGo.RocketAPI.Exceptions;
 using PokemonGo.RocketAPI.Extensions;
 using PokemonGo.RocketAPI.Helpers;
 using PokemonGo.RocketAPI.Login;
-using System.Windows.Forms;
 using PokemonGo.RocketAPI.Common;
 using POGOProtos.Inventory.Item;
 using POGOProtos.Networking.Envelopes;
@@ -28,8 +26,7 @@ namespace PokemonGo.RocketAPI
     {
         private readonly HttpClient _httpClient;
         private string _apiUrl;
-        private AuthType _authType = AuthType.Google;
-        private Request.Types.UnknownAuth _unknownAuth;
+        public AuthType AuthType = AuthType.Google;
         private const string VersionHash = "b1f2bf509a025b7cd76e1c484e2a24411c50f061"; // 
 
         private string _username;
@@ -364,7 +361,7 @@ namespace PokemonGo.RocketAPI
             var checkAwardedBadgesMessage = new CheckAwardedBadgesMessage();
             var downloadSettingsMessage = new DownloadSettingsMessage
             {
-                Hash = "05daf51635c82611d1aac95c0b051d3ec088a930"
+                Hash = VersionHash
             };
 
             #endregion
