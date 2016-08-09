@@ -116,6 +116,7 @@ namespace PokemonGo.RocketAPI
                 NormalizedHitPosition = 1
             };
 
+            SetRequestBuilder();
             var catchPokemonRequest = _requestBuilder.GetRequestEnvelope(RequestType.CatchPokemon, customRequest);
 
             return
@@ -147,6 +148,7 @@ namespace PokemonGo.RocketAPI
                 PlayerLongitude = CurrentLng
             };
 
+            SetRequestBuilder();
             var requestEnvelope = _requestBuilder.GetRequestEnvelope(RequestType.Encounter, customRequest);
             
             return
@@ -161,6 +163,7 @@ namespace PokemonGo.RocketAPI
                 PokemonId = pokemonId
             };
 
+            SetRequestBuilder();
             var releasePokemonRequest = _requestBuilder.GetRequestEnvelope(RequestType.EvolvePokemon, customRequest);
 
             return
@@ -176,6 +179,7 @@ namespace PokemonGo.RocketAPI
                 PokemonId = pokemonId
             };
 
+            SetRequestBuilder();
             var releasePokemonRequest = _requestBuilder.GetRequestEnvelope(RequestType.UpgradePokemon, customRequest);
             return
                 await
@@ -192,6 +196,7 @@ namespace PokemonGo.RocketAPI
                 Longitude = fortLng
             };
 
+            SetRequestBuilder();
             var fortDetailRequest = _requestBuilder.GetRequestEnvelope(RequestType.FortDetails, customRequest);
             return
                 await
@@ -201,6 +206,7 @@ namespace PokemonGo.RocketAPI
 
         public async Task<GetInventoryResponse> GetInventory()
         {
+            SetRequestBuilder();
             var inventoryRequest = _requestBuilder.GetRequestEnvelope(RequestType.GetInventory, new GetInventoryMessage());
             return
                 await
@@ -210,6 +216,7 @@ namespace PokemonGo.RocketAPI
 
         public async Task<DownloadItemTemplatesResponse> GetItemTemplates()
         {
+            SetRequestBuilder();
             var settingsRequest = _requestBuilder.GetRequestEnvelope(RequestType.DownloadItemTemplates, new DownloadItemTemplatesMessage());
 
             return
@@ -239,8 +246,8 @@ namespace PokemonGo.RocketAPI
             {
                 Hash = VersionHash
             };
-           
 
+            SetRequestBuilder();
             var request = _requestBuilder.GetRequestEnvelope(
                 new Request
                 {
@@ -271,6 +278,7 @@ namespace PokemonGo.RocketAPI
 
         public async Task<GetPlayerResponse> GetProfile()
         {
+            SetRequestBuilder();
             var profileRequest = _requestBuilder.GetInitialRequestEnvelope(new Request { RequestType = RequestType.GetPlayer, RequestMessage = new GetPlayerMessage().ToByteString() });
 
             return
@@ -279,6 +287,7 @@ namespace PokemonGo.RocketAPI
 
         public async Task<DownloadSettingsResponse> GetSettings()
         {
+            SetRequestBuilder();
             var settingsRequest = _requestBuilder.GetRequestEnvelope(RequestType.DownloadSettings, new DownloadSettingsMessage()
             {
                 Hash = VersionHash
@@ -297,6 +306,7 @@ namespace PokemonGo.RocketAPI
                 Count = amount
             };
 
+            SetRequestBuilder();
             var releasePokemonRequest = _requestBuilder.GetRequestEnvelope(
                     RequestType.RecycleInventoryItem,
                      customRequest);
@@ -324,7 +334,8 @@ namespace PokemonGo.RocketAPI
                 PlayerLatitude = CurrentLat,
                 PlayerLongitude = CurrentLng
             };
-
+            
+            SetRequestBuilder();
             var fortDetailRequest = _requestBuilder.GetRequestEnvelope(RequestType.FortSearch, customRequest);
 
             return
@@ -342,11 +353,21 @@ namespace PokemonGo.RocketAPI
             AuthType = type;
         }
 
+        public static double getElevation(double lat, double lon)
+        {
+            Random random = new Random();
+            double maximum = 11.0f;
+            double minimum = 8.6f;
+            double return1 = random.NextDouble() * (maximum - minimum) + minimum;
+
+            return return1;
+        }
+
         public void SetCoordinates(double lat, double lng, double altitude)
         {
             CurrentLat = lat;
             CurrentLng = lng;
-            CurrentAltitude = altitude;
+            CurrentAltitude = getElevation(lat, lng);
             SaveLatLng(lat, lng);
         }
 
@@ -368,7 +389,7 @@ namespace PokemonGo.RocketAPI
             };
 
             #endregion
-
+            SetRequestBuilder();
             var serverRequest = requestBuilder.GetInitialRequestEnvelope(
                 new Request
                 {
@@ -411,7 +432,7 @@ namespace PokemonGo.RocketAPI
             {
                 PokemonId = pokemonId
             };
-
+            SetRequestBuilder();
             var releasePokemonRequest = _requestBuilder.GetRequestEnvelope(RequestType.ReleasePokemon, customRequest);
             return
                 await
@@ -427,7 +448,7 @@ namespace PokemonGo.RocketAPI
                 Latitude = CurrentLat,
                 Longitude = CurrentLng
             };
-
+            SetRequestBuilder();
             var updateRequest = _requestBuilder.GetRequestEnvelope(RequestType.PlayerUpdate, customRequest);
 
             var updateResponse =
@@ -444,7 +465,7 @@ namespace PokemonGo.RocketAPI
                 ItemId = itemId,
                 SpawnPointId = spawnPointGuid
             };
-
+            SetRequestBuilder();
             var useItemRequest = _requestBuilder.GetRequestEnvelope(RequestType.UseItemCapture, customRequest);
             return
                 await
@@ -458,7 +479,7 @@ namespace PokemonGo.RocketAPI
             {
                 ItemId = itemId
             };
-
+            SetRequestBuilder();
             var useItemRequest = _requestBuilder.GetRequestEnvelope(RequestType.UseItemXpBoost, customRequest);
             return
                 await
@@ -472,7 +493,7 @@ namespace PokemonGo.RocketAPI
             {
                 ItemId = itemId
             };
-
+            SetRequestBuilder();
             var useItemRequest = _requestBuilder.GetRequestEnvelope(RequestType.UseIncense, customRequest);
             return
                 await

@@ -880,6 +880,16 @@ namespace PokemonGo.RocketAPI.GUI
             await GetCurrentPlayerInformation();
         }
 
+        public static double getElevation(double lat, double lon)
+        {
+            Random random = new Random();
+            double maximum = 11.0f;
+            double minimum = 8.6f;
+            double return1 = random.NextDouble() * (maximum - minimum) + minimum;
+
+            return return1;
+        }
+
         private async Task ExecuteFarmingPokestopsAndPokemons()
         {
             var mapObjects = await _client.GetMapObjects();
@@ -894,7 +904,7 @@ namespace PokemonGo.RocketAPI.GUI
                 // Use Teleporting if No Human Walking Enabled
                 if (!GUISettings.Default.humanWalkingEnabled)
                 {
-                    await _client.UpdatePlayerLocation(pokeStop.Latitude, pokeStop.Longitude, _settings.DefaultAltitude);
+                    await _client.UpdatePlayerLocation(pokeStop.Latitude, pokeStop.Longitude, getElevation(pokeStop.Latitude, pokeStop.Longitude));
                     UpdateMap(pokeStop.Latitude, pokeStop.Longitude);
                 }
                 else

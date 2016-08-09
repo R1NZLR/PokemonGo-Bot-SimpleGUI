@@ -37,9 +37,10 @@ namespace PokemonGo.RocketAPI.Common
             return ApiOperation.Retry;
         }
 
-        public void HandleApiSuccess()
+        public async void HandleApiSuccess()
         {
             _retryCount = 0;
+            await Task.Delay(200);
         }
 
         private async void DoLogin()
@@ -91,9 +92,10 @@ namespace PokemonGo.RocketAPI.Common
                 throw ex.InnerException;
             }
         }
-        public void HandleApiSuccess(RequestEnvelope request, ResponseEnvelope response)
+        public async void HandleApiSuccess(RequestEnvelope request, ResponseEnvelope response)
         {
             _retryCount = 0;
+            await Task.Delay(200);
         }
 
         public async Task<ApiOperation> HandleApiFailure(RequestEnvelope request, ResponseEnvelope response)
