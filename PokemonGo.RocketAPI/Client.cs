@@ -111,9 +111,9 @@ namespace PokemonGo.RocketAPI
                 Pokeball = pokeball,
                 SpawnPointId= spawnPointGuid,
                 HitPokemon = true,
-                NormalizedReticleSize = Utils.FloatAsUlong(1.950),
-                SpinModifier = Utils.FloatAsUlong(1),
-                NormalizedHitPosition = Utils.FloatAsUlong(1)
+                NormalizedReticleSize = 1.950,
+                SpinModifier = 1,
+                NormalizedHitPosition = 1
             };
 
             var catchPokemonRequest = _requestBuilder.GetRequestEnvelope(RequestType.CatchPokemon, customRequest);
@@ -143,8 +143,8 @@ namespace PokemonGo.RocketAPI
             {
                 EncounterId = encounterId,
                 SpawnPointId = spawnPointGuid,
-                PlayerLatitude = Utils.FloatAsUlong(CurrentLat),
-                PlayerLongitude = Utils.FloatAsUlong(CurrentLng)
+                PlayerLatitude = CurrentLat,
+                PlayerLongitude = CurrentLng
             };
 
             var requestEnvelope = _requestBuilder.GetRequestEnvelope(RequestType.Encounter, customRequest);
@@ -188,8 +188,8 @@ namespace PokemonGo.RocketAPI
             var customRequest = new FortDetailsMessage
             {
                 FortId = fortId,
-                Latitude = Utils.FloatAsUlong(fortLat),
-                Longitude = Utils.FloatAsUlong(fortLng)
+                Latitude = fortLat,
+                Longitude = fortLng
             };
 
             var fortDetailRequest = _requestBuilder.GetRequestEnvelope(RequestType.FortDetails, customRequest);
@@ -225,8 +225,8 @@ namespace PokemonGo.RocketAPI
             {
                 CellId = { S2Helper.GetNearbyCellIds(CurrentLng, CurrentLat) },
                 SinceTimestampMs = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-                Latitude = Utils.FloatAsUlong(CurrentLat),
-                Longitude = Utils.FloatAsUlong(CurrentLng)
+                Latitude = CurrentLat,
+                Longitude = CurrentLng
             };
 
             var getHatchedEggsMessage = new GetHatchedEggsMessage();
@@ -316,10 +316,10 @@ namespace PokemonGo.RocketAPI
             var customRequest = new FortSearchMessage
             {
                 FortId = fortId,
-                FortLatitude = Utils.FloatAsUlong(fortLat),
-                FortLongitude = Utils.FloatAsUlong(fortLng),
-                PlayerLatitude = Utils.FloatAsUlong(CurrentLat),
-                PlayerLongitude = Utils.FloatAsUlong(CurrentLng)
+                FortLatitude = fortLat,
+                FortLongitude = fortLng,
+                PlayerLatitude = CurrentLat,
+                PlayerLongitude = CurrentLng
             };
 
             var fortDetailRequest = _requestBuilder.GetRequestEnvelope(RequestType.FortSearch, customRequest);
@@ -421,8 +421,8 @@ namespace PokemonGo.RocketAPI
             SetCoordinates(lat, lng, alt);
             var customRequest = new PlayerUpdateMessage
             {
-                Latitude = Utils.FloatAsUlong(CurrentLat),
-                Longitude = Utils.FloatAsUlong(CurrentLng)
+                Latitude = CurrentLat,
+                Longitude = CurrentLng
             };
 
             var updateRequest = _requestBuilder.GetRequestEnvelope(RequestType.PlayerUpdate, customRequest);
@@ -453,7 +453,7 @@ namespace PokemonGo.RocketAPI
         {
             var customRequest = new UseItemCaptureMessage
             {
-                ItemId = itemId,
+                ItemId = itemId
             };
 
             var useItemRequest = _requestBuilder.GetRequestEnvelope(RequestType.UseItemXpBoost, customRequest);
