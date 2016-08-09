@@ -279,7 +279,10 @@ namespace PokemonGo.RocketAPI
 
         public async Task<DownloadSettingsResponse> GetSettings()
         {
-            var settingsRequest = _requestBuilder.GetRequestEnvelope(RequestType.DownloadSettings, new DownloadSettingsMessage());
+            var settingsRequest = _requestBuilder.GetRequestEnvelope(RequestType.DownloadSettings, new DownloadSettingsMessage()
+            {
+                Hash = VersionHash
+            });
             return
                 await
                     _httpClient.PostProtoPayload<Request, DownloadSettingsResponse>($"https://{_apiUrl}/rpc",
