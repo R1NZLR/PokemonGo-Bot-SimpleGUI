@@ -238,7 +238,7 @@ namespace PokemonGo.RocketAPI
             var checkAwardedBadgesMessage = new CheckAwardedBadgesMessage();
             var downloadSettingsMessage = new DownloadSettingsMessage
             {
-                Hash = "05daf51635c82611d1aac95c0b051d3ec088a930"
+                Hash = "b1f2bf509a025b7cd76e1c484e2a24411c50f061"
             };
            
 
