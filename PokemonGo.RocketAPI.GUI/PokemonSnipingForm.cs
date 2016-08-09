@@ -1,20 +1,18 @@
 ﻿using GeoCoordinatePortable;
-using PokemonGo.RocketAPI.Enums;
 using PokemonGo.RocketAPI.Extensions;
-using PokemonGo.RocketAPI.GeneratedCode;
 using PokemonGo.RocketAPI.GUI.Helpers;
 using PokemonGo.RocketAPI.Logic;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
-using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using POGOProtos.Inventory.Item;
+using POGOProtos.Map.Fort;
+using POGOProtos.Map.Pokemon;
+using POGOProtos.Networking.Responses;
 
 namespace PokemonGo.RocketAPI.GUI
 {
@@ -105,7 +103,7 @@ namespace PokemonGo.RocketAPI.GUI
                 ForceUnbanning = true;
 
                 var mapObjects = await _client.GetMapObjects();
-                var pokeStops = mapObjects.MapCells.SelectMany(i => i.Forts).Where(i => i.Type == FortType.Checkpoint && i.CooldownCompleteTimestampMs < DateTime.UtcNow.ToUnixTime());
+                var pokeStops = mapObjects.Item1.MapCells.SelectMany(i => i.Forts).Where(i => i.Type == FortType.Checkpoint && i.CooldownCompleteTimestampMs < DateTime.UtcNow.ToUnixTime());
 
                 await Task.Delay(1000);
 
@@ -154,11 +152,12 @@ namespace PokemonGo.RocketAPI.GUI
         {
             var mapObjects = await _client.GetMapObjects();
 
-            var pokemons = mapObjects.MapCells.SelectMany(i => i.CatchablePokemons);
+            var pokemons = mapObjects.Item1.MapCells.SelectMany(i => i.CatchablePokemons);
 
             var mapPokemons = pokemons as IList<MapPokemon> ?? pokemons.ToList();
-            if (mapPokemons.Count<MapPokemon>() > 0)
-                textResults.AppendText("Found " + mapPokemons.Count<MapPokemon>() + " Pokemon(s) in the area." + Environment.NewLine);
+
+            if (mapPokemons.Any())
+                textResults.AppendText("Found " + mapPokemons.Count + " Pokemon(s) in the area." + Environment.NewLine);
             else
             {
                 textResults.AppendText("No Pokemon(s) found in the area." + Environment.NewLine);
@@ -167,8 +166,8 @@ namespace PokemonGo.RocketAPI.GUI
 
             foreach (var pokemon in mapPokemons)
             {
-                var update = await _client.UpdatePlayerLocation(pokemon.Latitude, pokemon.Longitude, _client.Settings.DefaultAltitude);
-                var encounterPokemonResponse = await _client.EncounterPokemon(pokemon.EncounterId, pokemon.SpawnpointId);
+                await _client.UpdatePlayerLocation(pokemon.Latitude, pokemon.Longitude, _client.Settings.DefaultAltitude);
+                var encounterPokemonResponse = await _client.EncounterPokemon(pokemon.EncounterId, pokemon.SpawnPointId);
                 var pokemonCp = encounterPokemonResponse?.WildPokemon?.PokemonData?.Cp;
                 var pokemonIv = Logic.Logic.CalculatePokemonPerfection(encounterPokemonResponse?.WildPokemon?.PokemonData).ToString("0.00") + "%";
                 var pokeball = await GetBestBall(pokemonCp);
@@ -188,10 +187,10 @@ namespace PokemonGo.RocketAPI.GUI
                 {
                     if (encounterPokemonResponse?.CaptureProbability.CaptureProbability_.First() < (GUISettings.Default.minBerry / 100))
                     {
-                        await UseBerry(pokemon.EncounterId, pokemon.SpawnpointId);
+                        await UseBerry(pokemon.EncounterId, pokemon.SpawnPointId);
                     }
 
-                    caughtPokemonResponse = await _client.CatchPokemon(pokemon.EncounterId, pokemon.SpawnpointId, pokemon.Latitude, pokemon.Longitude, pokeball);
+                    caughtPokemonResponse = await _client.CatchPokemon(pokemon.EncounterId, pokemon.SpawnPointId, pokemon.Latitude, pokemon.Longitude, pokeball);
                     await Task.Delay(1000);
                 }
                 while (caughtPokemonResponse.Status == CatchPokemonResponse.Types.CatchStatus.CatchMissed);
@@ -211,44 +210,44 @@ namespace PokemonGo.RocketAPI.GUI
             }
         }
 
-        private async Task<MiscEnums.Item> GetBestBall(int? pokemonCp)
+        private async Task<ItemId> GetBestBall(int? pokemonCp)
         {
-            var pokeBallsCount = await _inventory.GetItemAmountByType(MiscEnums.Item.ITEM_POKE_BALL);
-            var greatBallsCount = await _inventory.GetItemAmountByType(MiscEnums.Item.ITEM_GREAT_BALL);
-            var ultraBallsCount = await _inventory.GetItemAmountByType(MiscEnums.Item.ITEM_ULTRA_BALL);
-            var masterBallsCount = await _inventory.GetItemAmountByType(MiscEnums.Item.ITEM_MASTER_BALL);
+            var pokeBallsCount = await _inventory.GetItemAmountByType(ItemId.ItemPokeBall);
+            var greatBallsCount = await _inventory.GetItemAmountByType(ItemId.ItemGreatBall);
+            var ultraBallsCount = await _inventory.GetItemAmountByType(ItemId.ItemUltraBall);
+            var masterBallsCount = await _inventory.GetItemAmountByType(ItemId.ItemMasterBall);
 
             if (masterBallsCount > 0 && pokemonCp >= 1000)
-                return MiscEnums.Item.ITEM_MASTER_BALL;
+                return ItemId.ItemMasterBall;
             else if (ultraBallsCount > 0 && pokemonCp >= 1000)
-                return MiscEnums.Item.ITEM_ULTRA_BALL;
+                return ItemId.ItemUltraBall;
             else if (greatBallsCount > 0 && pokemonCp >= 1000)
-                return MiscEnums.Item.ITEM_GREAT_BALL;
+                return ItemId.ItemGreatBall;
 
             if (ultraBallsCount > 0 && pokemonCp >= 600)
-                return MiscEnums.Item.ITEM_ULTRA_BALL;
+                return ItemId.ItemUltraBall;
             else if (greatBallsCount > 0 && pokemonCp >= 600)
-                return MiscEnums.Item.ITEM_GREAT_BALL;
+                return ItemId.ItemGreatBall;
 
             if (greatBallsCount > 0 && pokemonCp >= 350)
-                return MiscEnums.Item.ITEM_GREAT_BALL;
+                return ItemId.ItemGreatBall;
 
             if (pokeBallsCount > 0)
-                return MiscEnums.Item.ITEM_POKE_BALL;
+                return ItemId.ItemPokeBall;
             if (greatBallsCount > 0)
-                return MiscEnums.Item.ITEM_GREAT_BALL;
+                return ItemId.ItemGreatBall;
             if (ultraBallsCount > 0)
-                return MiscEnums.Item.ITEM_ULTRA_BALL;
+                return ItemId.ItemUltraBall;
             if (masterBallsCount > 0)
-                return MiscEnums.Item.ITEM_MASTER_BALL;
+                return ItemId.ItemMasterBall;
 
-            return MiscEnums.Item.ITEM_POKE_BALL;
+            return ItemId.ItemPokeBall;
         }
 
         public async Task UseBerry(ulong encounterId, string spawnPointId)
         {
             var inventoryItems = await _inventory.GetItems();
-            var berries = inventoryItems.Where(p => (ItemId)p.Item_ == ItemId.ItemRazzBerry);
+            var berries = inventoryItems.Where(p => p.ItemId == ItemId.ItemRazzBerry);
             var berry = berries.FirstOrDefault();
 
             if (berry == null)

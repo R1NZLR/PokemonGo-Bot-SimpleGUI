@@ -1,20 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using PokemonGo.RocketAPI.Enums;
 using System.Net;
 using System.IO;
-using PokemonGo.RocketAPI.GeneratedCode;
 using System.Collections;
-using static PokemonGo.RocketAPI.GeneratedCode.EvolvePokemonOut.Types;
 using PokemonGo.RocketAPI.Logic;
 using PokemonGo.RocketAPI.GUI.Helpers;
+using POGOProtos.Networking.Responses;
 
 namespace PokemonGo.RocketAPI.GUI
 {
@@ -80,7 +75,7 @@ namespace PokemonGo.RocketAPI.GUI
 
                 var currentCandy = families
                     .Where(i => (int)i.FamilyId <= (int)pokemon.PokemonId)
-                    .Select(f => f.Candy)
+                    .Select(f => f.Candy_)
                     .First();
 
                 listViewItem.ImageKey = pokemon.PokemonId.ToString();
@@ -210,9 +205,9 @@ namespace PokemonGo.RocketAPI.GUI
                     var id = (ulong)item.Tag;
                     var newPokemon = await _client.EvolvePokemon(id);
 
-                    if (newPokemon.Result == EvolvePokemonStatus.PokemonEvolvedSuccess)
-                        MessageBox.Show($"Congratulations with your new pokemon {newPokemon.EvolvedPokemon.PokemonType.ToString()} with {newPokemon.EvolvedPokemon.Cp} CP!");
-                    else if (newPokemon.Result == EvolvePokemonStatus.FailedInsufficientResources)
+                    if (newPokemon.Result == EvolvePokemonResponse.Types.Result.Success)
+                        MessageBox.Show($"Congratulations with your new pokemon {newPokemon.EvolvedPokemonData.PokemonId} with {newPokemon.EvolvedPokemonData.Cp} CP!");
+                    else if (newPokemon.Result == EvolvePokemonResponse.Types.Result.FailedInsufficientResources)
                         MessageBox.Show("Insufficient Resources!");
                     else
                         MessageBox.Show($"Error: {newPokemon.Result.ToString()}");
@@ -233,14 +228,14 @@ namespace PokemonGo.RocketAPI.GUI
                     var id = (ulong)item.Tag;
                     var poweredUpPokemon = await _client.PowerUpPokemon(id);
 
-                    if (poweredUpPokemon.Result == EvolvePokemonStatus.FailedInsufficientResources)
+                    if (poweredUpPokemon.Result == EvolvePokemonResponse.Types.Result.FailedInsufficientResources)
                         MessageBox.Show("Insufficient Resources!");
-                    else if (poweredUpPokemon.Result == EvolvePokemonStatus.FailedPokemonCannotEvolve)
+                    else if (poweredUpPokemon.Result == EvolvePokemonResponse.Types.Result.FailedPokemonCannotEvolve)
                         MessageBox.Show("Unable to powerup more for your current level!");
-                    else if (poweredUpPokemon.Result == EvolvePokemonStatus.PokemonEvolvedSuccess)
-                        MessageBox.Show($"Powerup success! New cp: {poweredUpPokemon.EvolvedPokemon.Cp}");
+                    else if (poweredUpPokemon.Result == EvolvePokemonResponse.Types.Result.Success)
+                        MessageBox.Show($"Powerup success! New cp: {poweredUpPokemon.EvolvedPokemonData.Cp}");
                     else
-                        MessageBox.Show($"Error: {poweredUpPokemon.Result.ToString()}");
+                        MessageBox.Show($"Error: {poweredUpPokemon.Result}");
 
                 }
             }

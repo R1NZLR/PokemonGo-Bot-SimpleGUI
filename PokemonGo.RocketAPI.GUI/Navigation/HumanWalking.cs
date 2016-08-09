@@ -1,14 +1,11 @@
 ﻿using GeoCoordinatePortable;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using PokemonGo.RocketAPI.GUI.Helpers;
-using PokemonGo.RocketAPI.GeneratedCode;
 using GMap.NET.WindowsForms;
 using GMap.NET.WindowsForms.Markers;
 using GMap.NET;
+using POGOProtos.Networking.Responses;
 
 namespace PokemonGo.RocketAPI.GUI.Navigation
 {
